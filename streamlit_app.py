@@ -10,7 +10,7 @@ from config.configuration import (
 )
 from dotenv import load_dotenv, find_dotenv
 import traceback
-from utils.together_utils import (
+from utils.inference_utils import (
     generate_airstack_graphql_by_together,
     generate_airstack_graphql_by_aws
 )
@@ -77,9 +77,17 @@ def main():
                         repetition_penalty=repetition_penalty,
                         prompt=input_prompt
                     )
-            if response:
+            if response and model_type == "together":
                 st.header("Generated GraphQL")
                 st.text_area(f"Model used: {model}", value=response.replace("```", ""), height=400, disabled=True, key="ct")
+            elif response and model_type == "aws":
+                response = response.json()
+                if response and isinstance(response, list):
+                    response = response[0]
+                response = response.get("generated_text")
+                response = response.strip()
+                st.header("Generated GraphQL")
+                st.text_area(f"Model used: {model}", value=response.replace("### Answer", " "), height=400, disabled=True, key="ct")
         elif generate_graphql and not input_prompt:
             st.error("Enter a question for which the GraphQL is to be generated!")
     except Exception:

@@ -4,20 +4,39 @@ LLAMA2_7B_CHAT = os.environ.get("LLAMA2_7B_CHAT")
 CODELLAMA_7B = os.environ.get("CODELLAMA_7B")
 MISTRALAI_7B = os.environ.get("MISTRALAI_7B")
 TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
+LAMBDA_URL=os.environ.get("LAMBDA_URL")
 
-PROMPT_TEMPLATE = \
+PROMPT_TEMPLATE_TOGETHER = \
 """<s>[INST]You are Airstack AI assistant and an expert at understanding the Socials API GraphQL schema and using it you are able to generate syntactically correct GraphQL queries that will fetch Web3 data for a given user query.
 
 Instructions:
-- Use the SDL for Socials API.
-- ENS (.eth, .cb.id) and Lens(.lens) name do not need a prefix.
-- Farcaster username or ID, use it as owner in your query input. Add the 'fc_fname:' prefix before Farcaster name (like 'fc_fname:vbuterin') , or 'fc_fid:' for Farcaster ID (like 'fc_fid:60'). Farcaster names and IDs do not contain '.eth' nor ‘.lens’ nor'lens/@'.
-- Lens profileName is lens/@examplename, profileHandle is @examplename either can be used as Identity without any modfication. 
-- Do not use the prefix 'fc_fid' if it is the '0x' address.
+- dappName should be included in the output
+- Farcaster username or ID, use it as owner in your query input. Add 'fc_fname:' prefix before Farcaster name (like 'fc_fname:vbuterin') , or 'fc_fid:' for Farcaster ID (like 'fc_fid:60'). Farcaster names and IDs do not contain '.eth' nor ‘.lens’ nor'lens/@''.
+- You must not not use prefixes 'fc_fid or 'lens/@'' if Identity is a full address like '0xB59Aa5Bb9270d44be3fA9b6D67520a2d28CF80AB'.
+- use identity filter for ENS names (.eth, .cb.id), lens handles (.lens) and Ethereum wallet addresses. 
+- If Farcaster profile name, Farcaster profile details or social profile details are requested in my question, you should return profileName and other profile details related fields from socials object in the query.
 
-User query: {human_query}
+User question: {human_query}
+
+Note: Do not create a GraphQL query if the user question does not make sense or does not comply with the SDL schema of the Social API. Instead, simply say "I do not know how to answer this at this time."
 [/INST]"""
 
+
+PROMPT_TEMPLATE_AWS = """
+### Instruction
+You are Airstack AI assistant and an expert at understanding the Socials API GraphQL schema and using it you are able to generate syntactically correct GraphQL queries that will fetch Web3 data for a given user query.
+
+Instructions:
+- dappName should be included in the output
+- Farcaster username or ID, use it as owner in your query input. Add 'fc_fname:' prefix before Farcaster name (like 'fc_fname:vbuterin') , or 'fc_fid:' for Farcaster ID (like 'fc_fid:60'). Farcaster names and IDs do not contain '.eth' nor ‘.lens’ nor'lens/@''.
+- You must not not use prefixes 'fc_fid or 'lens/@'' if Identity is a full address like '0xB59Aa5Bb9270d44be3fA9b6D67520a2d28CF80AB'.
+- use identity filter for ENS names (.eth, .cb.id), lens handles (.lens) and Ethereum wallet addresses. 
+- If Farcaster profile name, Farcaster profile details or social profile details are requested in my question, you should return profileName and other profile details related fields from socials object in the query.
+
+User question: "{human_query}"
+
+Note: Do not create a GraphQL query if the user question does not make sense or does not comply with the SDL schema of the Social API. Instead, simply say "I do not know how to answer this at this time."
+"""
 
 MODEL_NAMES = [
     "llama2-7b-chat",
