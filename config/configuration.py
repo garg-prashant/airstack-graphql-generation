@@ -41,6 +41,7 @@ Note: Do not create a GraphQL query if the user question does not make sense or 
 
 PROMPT_TEMPLATE_AWS = """
 ### Instruction
+
 {human_query}
 """
 
@@ -60,13 +61,13 @@ MODEL_NAME_MAPPING = {
         "model_type": "together",
         "model_name": CODELLAMA_7B
     },
-    "mistralai-7b-qlora": {
-        "model_type": "aws",
-        "model_name": MISTRALAI_7B_QLORA
-    },
     "mistralai-7b-fsdp": {
         "model_type": "aws",
         "model_name": MISTRALAI_7B_FSDP
+    },
+    "mistralai-7b-qlora": {
+        "model_type": "aws",
+        "model_name": MISTRALAI_7B_QLORA
     }
 }
 
