@@ -45,7 +45,7 @@ def main():
     input_prompt = st.text_area(
         "Insert a prompt below", 
         placeholder="What is 1+1?",
-        max_chars=5000, height=500)
+        max_chars=7000, height=500)
 
     generate_graphql = st.button("Get Response")
 
