@@ -14,9 +14,13 @@ from utils.inference_utils import (
     generate_airstack_graphql_by_together,
     generate_airstack_graphql_by_aws
 )
+from utils.utility import check_password
 
 
 def main():
+
+    if not check_password():
+        return
 
     with st.sidebar:
         st.header("Model")

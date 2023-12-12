@@ -7,6 +7,7 @@ MISTRALAI_7B_FSDP = os.environ.get("MISTRALAI_7B_FSDP")
 TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
 MIXTRAL_MODEL = os.environ.get("MIXTRAL_MODEL") 
 LAMBDA_URL=os.environ.get("LAMBDA_URL")
+ACCESS_PASSWORD = os.environ.get("ACCESS_PASSWORD")
 
 # PROMPT_TEMPLATE_TOGETHER = \
 # """<s>[INST]You are Airstack AI assistant and an expert at understanding the Socials API GraphQL schema and using it you are able to generate syntactically correct GraphQL queries that will fetch Web3 data for a given user query.
