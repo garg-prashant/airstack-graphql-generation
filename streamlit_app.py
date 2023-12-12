@@ -39,11 +39,11 @@ def main():
     st.title("Airstack LLM Inferences")
 
     input_prompt = st.text_area(
-        "Generate Airstack GraphQL (supports only Socials API)", 
-        placeholder="Fetch social profile details of betashop.eth on Farcaster",
-        max_chars=500, height=100)
+        "Insert a prompt below", 
+        placeholder="What is 1+1?",
+        max_chars=5000, height=500)
 
-    generate_graphql = st.button("Generate GraphQL")
+    generate_graphql = st.button("Get Response")
 
     model_metadata = MODEL_NAME_MAPPING.get(
         model
@@ -53,7 +53,7 @@ def main():
 
     try:
         if generate_graphql and input_prompt:
-            with st.spinner("Hold tight! Generating Airstack GraphQL for you..."):
+            with st.spinner("Hold tight! Generating response for you..."):
                 if model_type == "together":
                     response = generate_airstack_graphql_by_together(
                         model=model_name,
@@ -78,7 +78,7 @@ def main():
                         prompt=input_prompt
                     )
             if response and model_type == "together":
-                st.header("Generated GraphQL")
+                st.header("Generated Response")
                 st.text_area(f"Model used: {model}", value=response.replace("```", ""), height=400, disabled=True, key="ct")
             elif response and model_type == "aws":
                 response = response.json()
@@ -86,7 +86,7 @@ def main():
                     response = response[0]
                 response = response.get("generated_text")
                 response = response.strip()
-                st.header("Generated GraphQL")
+                st.header("Generated Response")
                 st.text_area(f"Model used: {model}", value=response.replace("### Answer", " "), height=400, disabled=True, key="ct")
         elif generate_graphql and not input_prompt:
             st.error("Enter a question for which the GraphQL is to be generated!")
