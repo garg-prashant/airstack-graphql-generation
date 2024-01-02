@@ -8,6 +8,7 @@ TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
 MIXTRAL_MODEL = os.environ.get("MIXTRAL_MODEL") 
 LAMBDA_URL=os.environ.get("LAMBDA_URL")
 ACCESS_PASSWORD = os.environ.get("ACCESS_PASSWORD")
+FINETUNED_LLAMA2_7B_CHAT = os.environ.get("FINETUNED_LLAMA2_7B_CHAT")
 
 # PROMPT_TEMPLATE_TOGETHER = \
 # """<s>[INST]You are Airstack AI assistant and an expert at understanding the Socials API GraphQL schema and using it you are able to generate syntactically correct GraphQL queries that will fetch Web3 data for a given user query.
@@ -27,6 +28,18 @@ ACCESS_PASSWORD = os.environ.get("ACCESS_PASSWORD")
 
 PROMPT_TEMPLATE_TOGETHER = """
 <s>[INST] {human_query} [/INST]
+"""
+
+FT_PROMPT_TEMPLATE_TOGETHER = """
+<s>[INST]<<SYS>>{system_prompt}<</SYS>>
+
+Here's user question: "{human_query}"
+
+SDL schema of {api} API is as follows:
+{sdl}
+
+Generate the GraphQL query for the user question in alignment to the SDL schema provided.
+[/INST]
 """
 
 
@@ -49,33 +62,20 @@ Notes:
 """
 
 MODEL_NAMES = [
-    # "llama2-7b-chat",
-    # "codellama2-7b",
-    # "mistralai-7b-fsdp",
-    # "mistralai-7b-qlora"
-    "mixtral_model_8*7B"
+    "mixtral_model_8*7B",
+    "ft_tog_llama2_7b_chat",
 ]
 
 MODEL_NAME_MAPPING = {
-    "llama2-7b-chat": {
-        "model_type": "together",
-        "model_name": LLAMA2_7B_CHAT    
-    },
-    "codellama2-7b": {
-        "model_type": "together",
-        "model_name": CODELLAMA_7B
-    },
-    "mistralai-7b-fsdp": {
-        "model_type": "aws",
-        "model_name": MISTRALAI_7B_FSDP
-    },
-    "mistralai-7b-qlora": {
-        "model_type": "aws",
-        "model_name": MISTRALAI_7B_QLORA
-    },
     "mixtral_model_8*7B": {
         "model_type": "together",
-        "model_name": MIXTRAL_MODEL
+        "model_name": MIXTRAL_MODEL,
+        "prompt_template": PROMPT_TEMPLATE_TOGETHER
+    },
+    "ft_tog_llama2_7b_chat": {
+        "model_type": "together",
+        "model_name": FINETUNED_LLAMA2_7B_CHAT,
+        "prompt_template": FT_PROMPT_TEMPLATE_TOGETHER
     }
 }
 
@@ -108,6 +108,13 @@ TOP_K = {
 REPETITION_PENALTY = {
     "min_val": 1.0,
     "max_val": 2.0,
-    "default_val": 1.0,
+    "default_val": 1.3,
     "step": 0.1
 }
+
+API_SELECTION = [
+    "--select--",
+    "Poaps",
+    "TokenBalances",
+    "TokenNfts"
+]

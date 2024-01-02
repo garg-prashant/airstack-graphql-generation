@@ -3,13 +3,22 @@ import requests
 
 from config.configuration import (
     TOGETHER_API_KEY,
-    PROMPT_TEMPLATE_TOGETHER,
     LAMBDA_URL,
     PROMPT_TEMPLATE_AWS
 )
 
 together.api_key = TOGETHER_API_KEY
+SYSTEM_PROMPT="""You are an Airstack AI assistant who can generate GraphQL queries for various Airstack APIs (e.g. Poaps, TokenBalances, Socials, TokenNfts, etc.) based on the instructions provided and the SDL schema of the API in response to the user's question."""
 
+
+def format_prompt(template, **args):
+    prompt = None
+
+    args['system_prompt'] = SYSTEM_PROMPT
+    if template:
+        prompt = template.format(**args)
+
+    return prompt
 
 
 def generate_airstack_graphql_by_together(
@@ -21,9 +30,6 @@ def generate_airstack_graphql_by_together(
     repetition_penalty,
     prompt
 ): 
-    prompt = PROMPT_TEMPLATE_TOGETHER.format(
-        human_query=prompt
-    )
     return together.Complete.create(
         model=model,
         prompt=prompt,
@@ -34,6 +40,7 @@ def generate_airstack_graphql_by_together(
         top_k=top_k,
         repetition_penalty=repetition_penalty
     )
+
 
 def generate_airstack_graphql_by_aws(
     model,

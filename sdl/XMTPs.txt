@@ -1,0 +1,187 @@
+enum EveryBlockchain {
+  ALL
+}
+
+scalar Identity
+
+input Identity_Comparator_Exp {
+  _eq: Identity
+  _in: [Identity!]
+}
+
+type XMTP {
+  id: ID
+  blockchain: EveryBlockchain
+  owner: Wallet
+  isXMTPEnabled: Boolean
+}
+
+input XMTPsInput {
+  blockchain: EveryBlockchain!
+  filter: XMTPFilter!
+  limit: Int
+  cursor: String
+}
+
+input XMTPFilter {
+  _and: [XMTPFilter!]
+  _or: [XMTPFilter!]
+  _nor: [XMTPFilter!]
+  owner: Identity_Comparator_Exp!
+}
+
+type XMTPsOutput {
+  XMTP: [XMTP!]
+  pageInfo: PageInfo
+}
+
+type Wallet {
+  identity: Identity!
+  blockchain: TokenBlockchain
+  addresses: [Address!]
+  primaryDomain: Domain
+  domains(input: DomainsNestedInput): [Domain!]
+  socials(input: SocialsNestedInput): [Social!]
+  tokenTransfers(input: TokenTransfersNestedInput): [TokenTransfer!]
+  tokenBalances(input: TokenBalancesNestedInput): [TokenBalance!]
+  nftSaleTransactions(input: NFTSaleTransactionsNestedInput): [NFTSaleTransaction!]
+  poaps(input: PoapsNestedInput): [Poap!]
+  xmtp: [XMTP!]
+}
+
+type Domain {
+  id: ID
+  parent: String
+  owner: Address!
+  ownerDetails: Wallet
+  resolvedAddressDetails: Wallet
+  resolvedAddress: Address
+  resolverAddress: Address
+  expiryTimestamp: Time
+  isPrimary: Boolean
+  labelName: String
+  labelHash: String
+  name: String
+  subDomains(input: DomainsNestedInput): [Domain]
+  subDomainCount: Int
+  tokenId: String
+  chainId: String
+  blockchain: Blockchain!
+  dappName: DomainDappName
+  createdAtBlockNumber: Int
+  createdAtBlockTimestamp: Time
+  lastUpdatedBlockNumber: Int
+  lastUpdatedBlockTimestamp: Time
+  tokenAddress: Address!
+  tokenNft: TokenNft
+}
+
+type Social {
+  id: ID
+  dappName: String
+  fnames: String
+  userId: String
+  userAddress: Address
+  userCreatedAtBlockTimestamp: Time
+  userCreatedAtBlockNumber: Int
+  userLastUpdatedAtBlockTimestamp: Time
+  userLastUpdatedAtBlockNumber: Int
+  userRecoveryAddress: Address
+  userAssociatedAddresses: [Address!]
+  profileName: String
+  profileTokenId: String
+  profileTokenAddress: String
+  profileCreatedAtBlockTimestamp: Time
+  profileCreatedAtBlockNumber: Int
+  profileLastUpdatedAtBlockTimestamp: Time
+  profileLastUpdatedAtBlockNumber: Int
+  profileTokenUri: String
+  profileImageContentValue: Media
+  coverImageContentValue: Media
+  profileTokenIdHex: String
+  handleTokenAddress: Address
+  handleTokenId: String
+  metadataURI: String
+  profileMetadata: Map
+  coverImageURI: String
+  twitterUserName: String
+  website: String
+  location: String
+  profileHandle: String
+  profileHandleNft: TokenNft
+  isDefault: Boolean
+  identity: Identity
+  followerTokenAddress: Address
+  followingCount: Int
+  followerCount: Int
+  profileBio: String
+  profileDisplayName: String
+  profileImage: String
+  profileUrl: String
+  tokenNft: TokenNft
+  userAddressDetails: Wallet
+  userAssociatedAddressDetails: [Wallet!]
+}
+
+type Poap {
+  id: ID
+  chainId: String
+  blockchain: EveryBlockchain
+  dappName: PoapDappName
+  dappSlug: PoapDappSlug
+  dappVersion: String
+  eventId: String
+  owner: Wallet!
+  createdAtBlockTimestamp: Time
+  createdAtBlockNumber: Int
+  tokenId: String
+  tokenAddress: String
+  tokenUri: String
+  poapEvent: [PoapEvent!]
+}
+
+type PoapEvent {
+  id: ID!
+  chainId: String
+  blockchain: EveryBlockchain
+  dappName: PoapDappName
+  dappSlug: PoapDappSlug!
+  dappVersion: String
+  eventId: String
+  tokenMints: Int
+  metadata: Map
+  contentType: String
+  contentValue: Media
+  eventName: String
+  description: String
+  country: String
+  city: String
+  startDate: Time
+  endDate: Time
+  isVirtualEvent: Boolean
+  eventURL: String
+  poaps(input: PoapsNestedInput): [Poap!]
+}
+
+type TokenBalance {
+  id: ID!
+  chainId: String!
+  blockchain: TokenBlockchain
+  tokenAddress: Address!
+  tokenId: String
+  owner: Wallet!
+  amount: String!
+  formattedAmount: Float
+  lastUpdatedBlock: Int!
+  lastUpdatedTimestamp: Time
+  tokenType: TokenType
+  token: Token
+  tokenNfts: TokenNft
+  tokenTransfers(input: TokenTransfersNestedInput): [TokenTransfer!]
+}
+
+
+
+type Query {
+  XMTPs(input: XMTPsInput!): XMTPsOutput
+}

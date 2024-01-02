@@ -1,7 +1,9 @@
+import os
 import streamlit as st
 from config.configuration import (
     ACCESS_PASSWORD
 )
+
 
 def check_password():
     if 'password_entered' not in st.session_state:
@@ -23,3 +25,18 @@ def check_password():
                 st.error("Incorrect password, please try again.")
 
     return st.session_state['password_entered']
+
+
+def read_file_contents(file_path):
+    with open(file_path, 'r') as file:
+        content = file.read()
+        return content
+
+def create_sdl_map():
+    sdl_map = {}
+    try:
+        for file in os.listdir("sdl"):
+            sdl_map[file.split(".txt")[0]] = read_file_contents(os.path.join("sdl", file))
+        return sdl_map
+    except Exception as err:
+        raise Exception(f"Error while creating SDL map: {err}") 

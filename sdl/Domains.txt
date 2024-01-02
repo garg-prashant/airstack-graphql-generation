@@ -1,0 +1,380 @@
+input String_Comparator_Exp {
+  _eq: String
+  _gt: String
+  _gte: String
+  _lt: String
+  _lte: String
+  _ne: String
+  _in: [String!]
+  _nin: [String!]
+}
+
+scalar Address
+
+input Address_Comparator_Exp {
+  _eq: Address
+  _ne: Address
+  _in: [Address!]
+  _nin: [Address!]
+}
+
+scalar Identity
+
+input Identity_Comparator_Exp {
+  _eq: Identity
+  _in: [Identity!]
+}
+
+input Boolean_Comparator_Exp {
+  _eq: Boolean
+}
+
+scalar Time
+
+scalar Range
+
+scalar TimeRange
+
+scalar DateRange
+
+enum OrderBy {
+  ASC
+  DESC
+}
+
+enum OrderByAsIntString {
+  ASC
+  DESC
+}
+
+enum TokenType {
+  ERC1155
+  ERC721
+  ERC20
+}
+
+type PageInfo {
+  prevCursor: String!
+  nextCursor: String!
+}
+
+scalar Map
+
+scalar IntString
+
+enum TokenBlockchain {
+  ethereum
+  polygon
+}
+
+enum Blockchain {
+  ethereum
+}
+
+type Media {
+  image: ImageSizes
+  video: String
+  audio: String
+  animation_url: AnimationUrlVariants
+}
+
+type ImageSizes {
+  extraSmall: String
+  small: String
+  medium: String
+  large: String
+  original: String
+}
+
+type AnimationUrlVariants {
+  original: String
+}
+
+type LogoSizes {
+  small: String
+  medium: String
+  large: String
+  original: String
+  external: String
+}
+
+type ContractMetadata {
+  name: String
+  description: String
+  image: String
+  externalLink: String
+  sellerFeeBasisPoints: Int
+  feeRecipient: String
+}
+
+type Token {
+  id: ID
+  address: Address!
+  chainId: String
+  blockchain: TokenBlockchain
+  name: String
+  symbol: String
+  owner: Wallet
+  type: TokenType
+  totalSupply: String
+  decimals: Int
+  logo: LogoSizes
+  contractMetaDataURI: String
+  contractMetaData: ContractMetadata
+  rawContractMetaData: Map
+  baseURI: String
+  lastTransferTimestamp: Time
+  lastTransferBlock: Int
+  lastTransferHash: String
+  tokenTraits: Map
+  tokenBalances(input: TokenBalancesNestedInput): [TokenBalance!]
+  tokenNfts(input: TokenNftsNestedInput): [TokenNft!]
+  projectDetails: ProjectDetails
+}
+
+type ProjectDetails {
+  collectionName: String
+  description: String
+  externalUrl: String
+  twitterUrl: String
+  discordUrl: String
+  imageUrl: String
+}
+
+type TokenBalance {
+  id: ID!
+  chainId: String!
+  blockchain: TokenBlockchain
+  tokenAddress: Address!
+  tokenId: String
+  owner: Wallet!
+  amount: String!
+  formattedAmount: Float
+  lastUpdatedBlock: Int!
+  lastUpdatedTimestamp: Time
+  tokenType: TokenType
+  token: Token
+  tokenNfts: TokenNft
+  tokenTransfers(input: TokenTransfersNestedInput): [TokenTransfer!]
+}
+
+type Wallet {
+  identity: Identity!
+  blockchain: TokenBlockchain
+  addresses: [Address!]
+  primaryDomain: Domain
+  domains(input: DomainsNestedInput): [Domain!]
+  socials(input: SocialsNestedInput): [Social!]
+  tokenTransfers(input: TokenTransfersNestedInput): [TokenTransfer!]
+  tokenBalances(input: TokenBalancesNestedInput): [TokenBalance!]
+  poaps(input: PoapsNestedInput): [Poap!]
+  xmtp: [XMTP!]
+}
+
+type Domain {
+  id: ID
+  parent: String
+  owner: Address!
+  ownerDetails: Wallet
+  resolvedAddressDetails: Wallet
+  resolvedAddress: Address
+  resolverAddress: Address
+  expiryTimestamp: Time
+  isPrimary: Boolean
+  labelName: String
+  labelHash: String
+  name: String
+  paymentToken: Token
+  paymentTokenCostInNativeToken: Float
+  paymentTokenCostInUSDC: Float
+  registrationCost: String
+  registrationCostInNativeToken: String
+  registrationCostInUSDC: String
+  formattedRegistrationCost: Float
+  formattedRegistrationCostInNativeToken: Float
+  formattedRegistrationCostInUSDC: Float
+  subDomains(input: DomainsNestedInput): [Domain]
+  subDomainCount: Int
+  tokenId: String
+  ttl: String
+  chainId: String
+  blockchain: Blockchain!
+  dappName: DomainDappName
+  dappSlug: DomainDappSlug
+  createdAtBlockNumber: Int
+  createdAtBlockTimestamp: Time
+  lastUpdatedBlockNumber: Int
+  lastUpdatedBlockTimestamp: Time
+  tokenAddress: Address!
+  tokenNft: TokenNft
+}
+
+type Social {
+  id: ID
+  dappName: String
+  fnames: String
+  userId: String
+  userAddress: Address
+  userCreatedAtBlockTimestamp: Time
+  userCreatedAtBlockNumber: Int
+  userLastUpdatedAtBlockTimestamp: Time
+  userLastUpdatedAtBlockNumber: Int
+  userRecoveryAddress: Address
+  userAssociatedAddresses: [Address!]
+  profileName: String
+  profileTokenId: String
+  profileTokenAddress: String
+  profileCreatedAtBlockTimestamp: Time
+  profileCreatedAtBlockNumber: Int
+  profileLastUpdatedAtBlockTimestamp: Time
+  profileLastUpdatedAtBlockNumber: Int
+  profileTokenUri: String
+  profileImageContentValue: Media
+  coverImageContentValue: Media
+  profileTokenIdHex: String
+  handleTokenAddress: Address
+  handleTokenId: String
+  metadataURI: String
+  profileMetadata: Map
+  coverImageURI: String
+  twitterUserName: String
+  website: String
+  location: String
+  profileHandle: String
+  profileHandleNft: TokenNft
+  isDefault: Boolean
+  identity: Identity
+  followerTokenAddress: Address
+  followingCount: Int
+  followerCount: Int
+  profileBio: String
+  profileDisplayName: String
+  profileImage: String
+  profileUrl: String
+  tokenNft: TokenNft
+  userAddressDetails: Wallet
+  userAssociatedAddressDetails: [Wallet!]
+}
+
+type TokenTransfer {
+  id: ID
+  chainId: String
+  blockchain: TokenBlockchain
+  from: Wallet
+  to: Wallet
+  type: String
+  tokenAddress: Address
+  operator: Wallet
+  amount: String
+  formattedAmount: Float
+  tokenId: String
+  amounts: [String!]
+  tokenIds: [String!]
+  tokenType: TokenType
+  transactionHash: String!
+  blockTimestamp: Time
+  blockNumber: Int
+  tokenNft: TokenNft
+  token: Token
+}
+
+type TokenNft {
+  id: ID!
+  address: Address!
+  tokenId: String!
+  blockchain: TokenBlockchain
+  chainId: String!
+  type: TokenType
+  totalSupply: String
+  tokenURI: String
+  contentType: String
+  contentValue: Media
+  metaData: NftMetadata
+  rawMetaData: Map
+  lastTransferHash: String
+  lastTransferBlock: Int
+  lastTransferTimestamp: Time
+  token: Token
+  tokenBalances(input: TokenBalancesNestedInput): [TokenBalance!]
+  tokenTransfers(input: TokenTransfersNestedInput): [TokenTransfer!]
+  erc6551Accounts(input: AccountsNestedInput): [Account!]
+}
+
+type NftMetadata {
+  name: String
+  description: String
+  image: String
+  attributes: [NftAttribute!]
+  imageData: String
+  backgroundColor: String
+  youtubeUrl: String
+  externalUrl: String
+  animationUrl: String
+}
+
+type NftAttribute {
+  trait_type: String
+  value: String
+  displayType: String
+  maxValue: String
+}
+
+type Nft {
+  tokenAddress: Address!
+  tokenId: String!
+  tokenAmount: String
+  tokenType: TokenType
+  tokenNft: TokenNft
+  token: Token
+}
+
+type Royalty {
+  beneficiaryAddress: String
+  amount: String
+  formattedAmount: Float
+  amountInUSDC: String
+  formattedAmountInUSDC: Float
+  amountInNativeToken: String
+  formattedAmountInNativeToken: Float
+}
+
+input DomainOrderBy {
+  expiryTimestamp: OrderBy
+  createdAtBlockTimestamp: OrderBy
+  lastUpdatedBlockTimestamp: OrderBy
+}
+
+input DomainFilter {
+  _and: [DomainFilter!]
+  _or: [DomainFilter!]
+  _nor: [DomainFilter!]
+  parent: String_Comparator_Exp
+  owner: Identity_Comparator_Exp
+  resolvedAddress: Address_Comparator_Exp
+  isPrimary: Boolean_Comparator_Exp
+  name: String_Comparator_Exp
+}
+
+input DomainInput {
+  resolvedAddress: Address
+  name: String
+  blockchain: Blockchain!
+}
+
+input DomainsInput {
+  order: [DomainOrderBy!]
+  filter: DomainFilter!
+  blockchain: Blockchain!
+  limit: Int
+  cursor: String
+}
+
+type DomainsOutput {
+  Domain: [Domain!]
+  pageInfo: PageInfo
+}
+
+type Query {
+  Domain(input: DomainInput!): Domain
+  Domains(input: DomainsInput!): DomainsOutput
+}
