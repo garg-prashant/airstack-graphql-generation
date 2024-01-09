@@ -68,14 +68,14 @@ def main(api_sdl_map):
         response = None
         if generate_graphql and input_prompt:
             with st.spinner("Hold tight! Generating response for you..."):
-                if model_type == "together":
-                    template=model_prompt_template
-                    input_prompt = format_prompt(
+                template=model_prompt_template
+                input_prompt = format_prompt(
                         template=template,
                         human_query=input_prompt,
                         api=api_selection,
                         sdl = api_sdl_map.get(api_selection)
                     )
+                if model_type == "together":
                     if not input_prompt:
                         st.error("Please provide a valid input prompt.")
                     else:

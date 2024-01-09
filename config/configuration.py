@@ -38,32 +38,27 @@ Here's user question: "{human_query}"
 SDL schema of {api} API is as follows:
 {sdl}
 
-Generate the GraphQL query for the user question in alignment to the SDL schema provided.
+Generate the GraphQL query for the user question in strict alignment to the SDL schema provided.
 [/INST]
 """
 
 
 PROMPT_TEMPLATE_AWS = """
 ### Instruction
-You are Airstack AI assistant and an expert at understanding the Socials API GraphQL schema and using it you are able to generate syntactically correct GraphQL queries that will fetch Web3 data for a given user query.
+{system_prompt}
 
-User question: "{human_query}"
+Following is the SDL schema for {api} API:
+{sdl}
 
-Notes:
-- dappName should be included in the output
-- Farcaster username or ID, use it as owner in your query input. Add 'fc_fname:' prefix before Farcaster name (like 'fc_fname:vbuterin') , or 'fc_fid:' for Farcaster ID (like 'fc_fid:60'). Farcaster names and IDs do not contain '.eth' nor ‘.lens’ nor'lens/@''.
-- You must not not use prefixes 'fc_fid or 'lens/@'' if Identity is a full address like '0xB59Aa5Bb9270d44be3fA9b6D67520a2d28CF80AB'.
-- use identity filter for ENS names (.eth, .cb.id), lens handles (.lens) and Ethereum wallet addresses. 
-- If Farcaster profile name, Farcaster profile details or social profile details are requested in my question, you should return profileName and other profile details related fields from socials object in the query.
+Based on the above API SDL schema and following user question: "{human_query}"
 
-### Context
-
-### Response
+Generate the GraphQL query for the user question in strict alignment to the SDL schema provided.
 """
 
 MODEL_NAMES = [
     "mixtral_model_8*7B",
     "ft_tog_llama2_7b_chat",
+    "ft_aws_llama2_7b_chat",
 ]
 
 MODEL_NAME_MAPPING = {
@@ -76,7 +71,12 @@ MODEL_NAME_MAPPING = {
         "model_type": "together",
         "model_name": FINETUNED_LLAMA2_7B_CHAT,
         "prompt_template": FT_PROMPT_TEMPLATE_TOGETHER
-    }
+    },
+    # "ft_aws_llama2_7b_chat": {
+    #     "model_type": "aws",
+    #     "model_name": "",
+    #     "prompt_template": FT_PROMPT_TEMPLATE_TOGETHER
+    # }
 }
 
 OUTPUT_LENGTH = {
@@ -116,5 +116,6 @@ API_SELECTION = [
     "--select--",
     "Poaps",
     "TokenBalances",
-    "TokenNfts"
+    "TokenNfts",
+    "Socials"
 ]

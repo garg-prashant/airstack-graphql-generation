@@ -51,9 +51,6 @@ def generate_airstack_graphql_by_aws(
     repetition_penalty,
     prompt
 ): 
-    prompt = PROMPT_TEMPLATE_AWS.format(
-        human_query=prompt
-    )
 
     response = requests.post(
         url=LAMBDA_URL,
@@ -62,8 +59,10 @@ def generate_airstack_graphql_by_aws(
             "parameters": {
                 "max_new_tokens": output_length, 
                 "top_p": top_p, 
+                "top_k": top_k,
+                "repetition_penalty": repetition_penalty,
                 "temperature": temperature,
-                "do_sample": True
+                "stop": ["</s>"]
             }
         }
     )
