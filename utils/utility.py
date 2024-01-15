@@ -1,7 +1,10 @@
 import os
+import requests
 import streamlit as st
+import traceback
 from config.configuration import (
-    ACCESS_PASSWORD
+    ACCESS_PASSWORD,
+    AIRSTACK_API_KEY
 )
 
 
@@ -51,3 +54,28 @@ def create_enhanced_sdl_map():
         return sdl_map
     except Exception as err:
         raise Exception(f"Error while creating SDL map: {err}") 
+    
+
+def get_airstack_response(graphql_query):
+    if not graphql_query:
+        return None
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {AIRSTACK_API_KEY}"
+        }
+        response = requests.post(
+            url="https://api.airstack.xyz/graphql",
+            json={
+                "query": graphql_query
+            },
+            headers=headers
+        )
+        if response.status_code!=200:
+            raise Exception(f"Inference error {response.text}")
+        return response.json()
+    except Exception as err:
+        error_message = traceback.format_exc()
+        return {
+            "error": f"Error while fetching airstack response: {error_message}"
+        }
