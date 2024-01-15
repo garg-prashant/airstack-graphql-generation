@@ -18,11 +18,12 @@ from utils.inference_utils import (
 )
 from utils.utility import (
     check_password,
-    create_sdl_map
+    create_sdl_map,
+    create_enhanced_sdl_map
 )
 
 
-def main(api_sdl_map):
+def main(api_sdl_map, enhanced_api_sdl_map):
 
     if not check_password():
         return
@@ -63,12 +64,17 @@ def main(api_sdl_map):
     model_type = model_metadata.get("model_type")
     model_name = model_metadata.get("model_name")
     model_prompt_template = model_metadata.get("prompt_template")
+    sdl_type = model_metadata.get("sdl")
 
     try:
         response = None
         if generate_graphql and input_prompt:
             with st.spinner("Hold tight! Generating response for you..."):
                 template=model_prompt_template
+
+                if sdl_type == "enhanced":
+                    api_sdl_map = enhanced_api_sdl_map
+
                 input_prompt = format_prompt(
                         template=template,
                         human_query=input_prompt,
@@ -121,7 +127,9 @@ def main(api_sdl_map):
         else:
             st.error(f"Error: {traceback.format_exc()}")
 
+
 if __name__ == "__main__":
     _ = load_dotenv(find_dotenv())
     api_sdl_map = create_sdl_map()
-    main(api_sdl_map)
+    enhanced_api_sdl_map = create_enhanced_sdl_map()
+    main(api_sdl_map, enhanced_api_sdl_map)

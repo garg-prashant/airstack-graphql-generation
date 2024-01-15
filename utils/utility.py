@@ -32,11 +32,22 @@ def read_file_contents(file_path):
         content = file.read()
         return content
 
+
 def create_sdl_map():
     sdl_map = {}
     try:
         for file in os.listdir("sdl"):
             sdl_map[file.split(".txt")[0]] = read_file_contents(os.path.join("sdl", file))
+        return sdl_map
+    except Exception as err:
+        raise Exception(f"Error while creating SDL map: {err}") 
+
+
+def create_enhanced_sdl_map():
+    sdl_map = {}
+    try:
+        for file in os.listdir("enhanced_sdl"):
+            sdl_map[file.split(".txt")[0]] = read_file_contents(os.path.join("enhanced_sdl", file))
         return sdl_map
     except Exception as err:
         raise Exception(f"Error while creating SDL map: {err}") 

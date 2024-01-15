@@ -3,8 +3,6 @@ import requests
 
 from config.configuration import (
     TOGETHER_API_KEY,
-    LAMBDA_URL,
-    PROMPT_TEMPLATE_AWS
 )
 
 together.api_key = TOGETHER_API_KEY
@@ -53,7 +51,7 @@ def generate_airstack_graphql_by_aws(
 ): 
 
     response = requests.post(
-        url=LAMBDA_URL,
+        url=model,
         json={
             "inputs": prompt,
             "parameters": {
@@ -62,6 +60,8 @@ def generate_airstack_graphql_by_aws(
                 "top_k": top_k,
                 "repetition_penalty": repetition_penalty,
                 "temperature": temperature,
+                "do_sample": True,
+                "return_full_text": False,
                 "stop": ["</s>"]
             }
         }
