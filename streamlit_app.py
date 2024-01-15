@@ -73,7 +73,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
 
         try:
             response = None
-            if generate_graphql and input_prompt:
+            if generate_graphql and input_prompt and api_selection != "--select--":
                 with st.spinner("Hold tight! Generating response for you..."):
                     template=model_prompt_template
 
@@ -127,6 +127,8 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                     st.text_area(f"Model used: {model}", value=response, height=400, disabled=True, key="ct")
             elif generate_graphql and not input_prompt:
                 st.error("Enter a question for which the GraphQL is to be generated!")
+            elif generate_graphql and api_selection == "--select--":
+                st.error("Please select a valid API.")
         except Exception:
             error_trace = str(traceback.format_exc())
             if "Not Found for url" in error_trace:
