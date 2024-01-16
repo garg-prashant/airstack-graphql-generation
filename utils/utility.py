@@ -1,4 +1,5 @@
 import os
+import uuid
 import requests
 import streamlit as st
 import traceback
@@ -6,6 +7,13 @@ from config.configuration import (
     ACCESS_PASSWORD,
     AIRSTACK_API_KEY
 )
+from utils.database_utils import (
+    SessionLocal
+)
+from utils.model import (
+    UserActionTracking
+)
+from datetime import datetime
 
 
 def check_password():
@@ -79,3 +87,37 @@ def get_airstack_response(graphql_query):
         return {
             "error": f"Error while fetching airstack response: {error_message}"
         }
+
+
+def persist_response(
+        model_name,
+        selected_api,
+        human_query,
+        graphql_query,
+        response,
+        generation_time,
+        model_parameters,
+        miscellanous
+    ):
+    session = None
+    try:
+        session = SessionLocal()
+        tracing_meta = UserActionTracking(
+            _id = str(uuid.uuid4()),
+            model_name = model_name,
+            selected_api = selected_api,
+            human_query = human_query,
+            graphql_query = graphql_query,
+            response = response,
+            generation_time = generation_time,
+            model_parameters = model_parameters,
+            miscellaneous = miscellanous,
+            created_at = datetime.now()
+        )
+        session.add(tracing_meta)
+        session.commit()
+    except Exception as err:
+        raise Exception(f"Error while persisting response: {err}")
+    finally:
+        session.close()
+

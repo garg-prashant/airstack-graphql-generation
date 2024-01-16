@@ -20,8 +20,11 @@ from utils.utility import (
     check_password,
     create_sdl_map,
     create_enhanced_sdl_map,
-    get_airstack_response
+    get_airstack_response,
+    persist_response
 )
+from utils.database_utils import Base, engine
+import time
 
 
 def main(api_sdl_map, enhanced_api_sdl_map):
@@ -29,9 +32,11 @@ def main(api_sdl_map, enhanced_api_sdl_map):
     if not check_password():
         return
 
-    left_column, line_column, right_column = st.columns([0.55, 0.05,0.40])
+    left_column, _, right_column = st.columns([0.55, 0.05,0.40])
 
     response = None
+    generation_time = None
+
     with left_column:
 
         with st.sidebar:
@@ -60,6 +65,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
         input_prompt = st.text_area(
             "Insert your question here", 
             placeholder="Lens profile details of betashop.eth", height=50)
+        human_query = input_prompt
 
         generate_graphql = st.button("Get Response")
 
@@ -73,6 +79,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
 
         try:
             response = None
+            time_started = time.time()
             if generate_graphql and input_prompt and api_selection != "--select--":
                 with st.spinner("Hold tight! Generating response for you..."):
                     template=model_prompt_template
@@ -102,6 +109,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                             response = response.get("output", {}).get("choices", [])[0].get("text")
                             if not response:
                                 st.error("Could not generate the GraphQL query.")
+                            generation_time = time.time() - time_started
                     elif model_type == "aws":
                         response = generate_airstack_graphql_by_aws(
                             model=model_name,
@@ -112,6 +120,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                             repetition_penalty=repetition_penalty,
                             prompt=input_prompt
                         )
+                        generation_time = time.time() - time_started
                 if response and model_type == "together":
                     st.header("Generated Response")
                     response = response.replace("```", "")
@@ -139,11 +148,29 @@ def main(api_sdl_map, enhanced_api_sdl_map):
     if response:
         with right_column:
             st.title("Results")
-            st.text_area(f"Data response:", value=dict(get_airstack_response(response)), height=800, disabled=True, key="ct2")
+            data_response = get_airstack_response(response)
+            st.text_area(f"Data response:", value=data_response, height=800, disabled=True, key="ct2")
+            persist_response(
+                model_name=model,
+                selected_api=api_selection,
+                human_query=human_query,
+                graphql_query=response,
+                response=str(data_response),
+                generation_time=generation_time,
+                miscellanous={},
+                model_parameters={
+                    "output_length": output_length,
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "top_k": top_k,
+                    "repetition_penalty": repetition_penalty
+                },
+            )
 
 
 if __name__ == "__main__":
     _ = load_dotenv(find_dotenv())
+    Base.metadata.create_all(bind=engine)
     api_sdl_map = create_sdl_map()
     enhanced_api_sdl_map = create_enhanced_sdl_map()
     main(api_sdl_map, enhanced_api_sdl_map)
