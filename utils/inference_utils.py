@@ -1,5 +1,7 @@
 import together
 import requests
+from graphql import graphql_sync, build_schema
+
 
 from config.configuration import (
     TOGETHER_API_KEY,
@@ -70,3 +72,14 @@ def generate_airstack_graphql_by_aws(
     if response.status_code!=200:
         raise Exception(f"Inference error {response.text}")
     return response
+
+
+def validate_graphql_query(gql_query, sdl_schema):
+    try:
+        schema_obj = build_schema(sdl_schema)
+        result = graphql_sync(schema_obj, gql_query)
+        if result.errors:
+            return {"error": str(result.errors)}
+        return {"graphql_query": gql_query}
+    except Exception as e:
+        return {"error": str(e)}

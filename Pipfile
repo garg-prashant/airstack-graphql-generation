@@ -9,6 +9,7 @@ streamlit = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
+graphql-core = "*"
 
 [dev-packages]
 

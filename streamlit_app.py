@@ -14,20 +14,22 @@ import traceback
 from utils.inference_utils import (
     generate_airstack_graphql_by_together,
     generate_airstack_graphql_by_aws,
-    format_prompt
+    format_prompt,
+    validate_graphql_query
 )
 from utils.utility import (
     check_password,
     create_sdl_map,
     create_enhanced_sdl_map,
     get_airstack_response,
-    persist_response
+    persist_response,
+    fetch_airstack_complete_sdl
 )
 from utils.database_utils import Base, engine
 import time
 
 
-def main(api_sdl_map, enhanced_api_sdl_map):
+def main(api_sdl_map, enhanced_api_sdl_map, complete_sdl):
 
     if not check_password():
         return
@@ -36,6 +38,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
 
     response = None
     generation_time = None
+    miscellanous = {}
 
     with left_column:
 
@@ -124,6 +127,17 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                 if response and model_type == "together":
                     st.header("Generated Response")
                     response = response.replace("```", "")
+
+                    validate_response = validate_graphql_query(response, complete_sdl)
+                    if validate_response.get("error"):
+                        miscellanous = {
+                            "response": response,
+                            "error": validate_response.get("error")
+                        }
+                        response = f"Query '{human_query}' not supported by the SDL schema for '{api_selection}' API"
+                    else:
+                        response = validate_response.get("graphql_query")
+
                     st.text_area(f"Model used: {model}", value=response, height=400, disabled=True, key="ct")
                 elif response and model_type == "aws":
                     response = response.json()
@@ -133,6 +147,17 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                     response = response.strip()
                     st.header("Generated Response")
                     response = response.replace("### Answer", " ")
+                    
+                    validate_response = validate_graphql_query(response, complete_sdl)
+                    if validate_response.get("error"):
+                        miscellanous = {
+                            "response": response,
+                            "error": validate_response.get("error")
+                        }
+                        response = f"Query '{human_query}' not supported by the SDL schema for '{api_selection}' API"
+                    else:
+                        response = validate_response.get("graphql_query")
+                    
                     st.text_area(f"Model used: {model}", value=response, height=400, disabled=True, key="ct")
             elif generate_graphql and not input_prompt:
                 st.error("Enter a question for which the GraphQL is to be generated!")
@@ -148,7 +173,10 @@ def main(api_sdl_map, enhanced_api_sdl_map):
     if response:
         with right_column:
             st.title("Results")
-            data_response = get_airstack_response(response)
+
+            data_response = ""
+            if not miscellanous:
+                data_response = get_airstack_response(response)
             st.text_area(f"Data response:", value=data_response, height=800, disabled=True, key="ct2")
             persist_response(
                 model_name=model,
@@ -157,7 +185,7 @@ def main(api_sdl_map, enhanced_api_sdl_map):
                 graphql_query=response,
                 response=str(data_response),
                 generation_time=generation_time,
-                miscellanous={},
+                miscellanous=miscellanous,
                 model_parameters={
                     "output_length": output_length,
                     "temperature": temperature,
@@ -173,4 +201,9 @@ if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
     api_sdl_map = create_sdl_map()
     enhanced_api_sdl_map = create_enhanced_sdl_map()
-    main(api_sdl_map, enhanced_api_sdl_map)
+    complete_sdl = fetch_airstack_complete_sdl()
+    main(
+        api_sdl_map, 
+        enhanced_api_sdl_map,
+        complete_sdl
+    )

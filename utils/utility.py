@@ -64,6 +64,13 @@ def create_enhanced_sdl_map():
         raise Exception(f"Error while creating SDL map: {err}") 
     
 
+def fetch_airstack_complete_sdl():
+    try:
+        return read_file_contents(os.path.join("complete_sdl", "airstack_sdl.txt"))
+    except Exception as err:
+        raise Exception(f"Error while reading complete Airstack SDL: {err}") 
+
+
 def get_airstack_response(graphql_query):
     if not graphql_query:
         return None
