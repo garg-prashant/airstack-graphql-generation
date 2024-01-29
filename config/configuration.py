@@ -49,13 +49,35 @@ FINETUNED_PROMPT_TEMPLATE_AWS_ENHANCED = """
 
 {sdl}
 
-User question: '{human_query}' [/INST]"
+User question: '{human_query}' [/INST]
+"""
+
+
+GRAPHQL_SYNTAX_RECTIFIER = r"""
+<s>[INST]<<SYS>> You are expert in fixing the GraphQL query if there are any syntax errors in it.<</SYS>>
+
+Following is the GraphQL query: 
+```graphql
+{graphql_query}
+```
+
+Following are validation errors: 
+```
+{validation_errors}
+```
+
+If there are no validation errors, return the original GraphQL query.
+Otherwise, you should fix all the GraphQL errors and return rectified GraphQL.
+
+Note: Remove the fields which can not be queried.
+
+[/INST]
 """
 
 
 MODEL_NAMES = [
     "mistral_7b_aws",
-    "llama2_7b_aws",
+    # "llama2_7b_aws",
 ]
 
 MODEL_NAME_MAPPING = {

@@ -15,7 +15,6 @@ from utils.inference_utils import (
     generate_airstack_graphql_by_together,
     generate_airstack_graphql_by_aws,
     format_prompt,
-    validate_graphql_query
 )
 from utils.utility import (
     check_password,
@@ -23,13 +22,15 @@ from utils.utility import (
     create_enhanced_sdl_map,
     get_airstack_response,
     persist_response,
-    fetch_airstack_complete_sdl
+)
+from utils.langchain_utils import (
+    validate_graphql_query
 )
 from utils.database_utils import Base, engine
 import time
 
 
-def main(api_sdl_map, enhanced_api_sdl_map, complete_sdl):
+def main(api_sdl_map, enhanced_api_sdl_map):
 
     if not check_password():
         return
@@ -92,9 +93,9 @@ def main(api_sdl_map, enhanced_api_sdl_map, complete_sdl):
 
                     input_prompt = format_prompt(
                             template=template,
-                            human_query=input_prompt,
+                            human_query='{human_query}',
                             api=api_selection,
-                            sdl = api_sdl_map.get(api_selection)
+                            sdl = api_sdl_map.get(api_selection).replace("{", "{{").replace("}", "}}"),
                         )
                     if model_type == "together":
                         if not input_prompt:
@@ -121,18 +122,19 @@ def main(api_sdl_map, enhanced_api_sdl_map, complete_sdl):
                             top_p=top_p,
                             top_k=top_k,
                             repetition_penalty=repetition_penalty,
-                            prompt=input_prompt
+                            formatted_template=input_prompt,
+                            prompt=human_query
                         )
                         generation_time = time.time() - time_started
                 if response and model_type == "together":
                     st.header("Generated Response")
                     response = response.replace("```", "")
 
-                    validate_response = validate_graphql_query(response, complete_sdl)
-                    if validate_response.get("error"):
+                    validate_response = validate_graphql_query(response)
+                    if validate_response.get("validation_errors"):
                         miscellanous = {
                             "response": response,
-                            "error": validate_response.get("error")
+                            "error": validate_response.get("validation_errors")
                         }
                         response = f"Query '{human_query}' not supported by the SDL schema for '{api_selection}' API"
                     else:
@@ -140,19 +142,12 @@ def main(api_sdl_map, enhanced_api_sdl_map, complete_sdl):
 
                     st.text_area(f"Model used: {model}", value=response, height=400, disabled=True, key="ct")
                 elif response and model_type == "aws":
-                    response = response.json()
-                    if response and isinstance(response, list):
-                        response = response[0]
-                    response = response.get("generated_text")
-                    response = response.strip()
-                    st.header("Generated Response")
-                    response = response.replace("### Answer", " ")
                     
-                    validate_response = validate_graphql_query(response, complete_sdl)
-                    if validate_response.get("error"):
+                    validate_response = validate_graphql_query(response)
+                    if validate_response.get("validation_errors"):
                         miscellanous = {
                             "response": response,
-                            "error": validate_response.get("error")
+                            "error": validate_response.get("validation_errors")
                         }
                         response = f"Query '{human_query}' not supported by the SDL schema for '{api_selection}' API"
                     else:
@@ -201,9 +196,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
     api_sdl_map = create_sdl_map()
     enhanced_api_sdl_map = create_enhanced_sdl_map()
-    complete_sdl = fetch_airstack_complete_sdl()
     main(
         api_sdl_map, 
         enhanced_api_sdl_map,
-        complete_sdl
     )

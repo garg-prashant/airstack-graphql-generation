@@ -1,6 +1,5 @@
 import together
-import requests
-from graphql import graphql_sync, build_schema
+from utils.langchain_utils import get_llm, generate_graphql
 
 
 from config.configuration import (
@@ -49,37 +48,24 @@ def generate_airstack_graphql_by_aws(
     top_p,
     top_k,
     repetition_penalty,
+    formatted_template,
     prompt
 ): 
-
-    response = requests.post(
-        url=model,
-        json={
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": output_length, 
-                "top_p": top_p, 
-                "top_k": top_k,
-                "repetition_penalty": repetition_penalty,
-                "temperature": temperature,
-                "do_sample": True,
-                "return_full_text": False,
-                "stop": ["</s>"]
-            }
-        }
+    parameters = {
+        "max_new_tokens": output_length, 
+        "top_p": top_p, 
+        "top_k": top_k,
+        "repetition_penalty": repetition_penalty,
+        "temperature": temperature,
+        "do_sample": True,
+        "return_full_text": False,
+        "stop": ["</s>"]
+    }
+    llm = get_llm(endpoint_url=model, model_kwargs=parameters)
+    
+    llm.model_kwargs = parameters
+    return generate_graphql(
+        formatted_template=formatted_template,
+        human_query=prompt,
+        llm=llm
     )
-
-    if response.status_code!=200:
-        raise Exception(f"Inference error {response.text}")
-    return response
-
-
-def validate_graphql_query(gql_query, sdl_schema):
-    try:
-        schema_obj = build_schema(sdl_schema)
-        result = graphql_sync(schema_obj, gql_query)
-        if result.errors:
-            return {"error": str(result.errors)}
-        return {"graphql_query": gql_query}
-    except Exception as e:
-        return {"error": str(e)}
